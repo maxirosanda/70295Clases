@@ -1,7 +1,11 @@
 export const authorization = (role) => {
     return async (req,res,next) => {
-        if(!req.user) return res.status(401).send("Uniauthorized")
-        if(req.user.role != role) return res.status(403).send("No Permissions")
-        next()
+        if(!req.user) return res.status(401).json({message:"Uniauthorized"})
+        for(const roleUser of req.user.roles){
+            if(roleUser === role){
+                return next()
+            }
+        }
+        return res.status(403).json({message:"No Permissions"})
     }
 }

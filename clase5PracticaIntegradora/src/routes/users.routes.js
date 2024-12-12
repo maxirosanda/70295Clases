@@ -4,35 +4,36 @@ import { createHash } from "../utils/hashingUtils.js"
 import passport from "passport"
 import { generateToken } from "../utils/generateToken.js"
 import { authorization } from "../middlewares/authorization.js"
+import { passportCall } from "../utils/passportCall.js"
 
 const router = Router()
 
-router.post('/register',passport.authenticate('register',{session:false,failureRedirect:'/api/users/failRegister'}),async (req,res)=>{
+router.post('/register',passportCall('register'),async (req,res)=>{
 
     try {
 
-        if(!req.user) return res.status(400).send("Registration failed")
+        if(!req.user) return res.status(400).json({message:"Registration failed"})
         const token = generateToken(req.user)
-        res.cookie('coderPracticaIntegrado',token,{httpOnly:true}).send('user registed')
+        res.cookie('coderPracticaIntegrado',token,{httpOnly:true}).json({message:'user registed'})
 
     } catch (error) {
-        res.status(400).send(error)
+        res.status(400).json(error)
     }
 
 
 })
 
 
-router.post('/login',passport.authenticate('login',{session:false,failureRedirect:'/api/users/failLogin'}),async (req,res)=>{
+router.post('/login',passportCall("login"),async (req,res)=>{
 
     try {
 
-        if(!req.user) return res.status(400).send("Registration failed")
+        if(!req.user) return res.status(400).json({message:"Registration failed"})
         const token = generateToken(req.user)
-        res.cookie('coderPracticaIntegrado',token,{httpOnly:true}).send('Ok login')
+        res.cookie('coderPracticaIntegrado',token,{httpOnly:true}).json({message:'Ok login'})
 
     } catch (error) {
-        res.status(400).send(error)
+        res.status(400).json(error)
     }
 
 
@@ -40,13 +41,13 @@ router.post('/login',passport.authenticate('login',{session:false,failureRedirec
 
 router.get('/logout', (req, res) => {
 
-    res.clearCookie('coderPracticaIntegrado').json({ message: "Logout exitoso" })
+    res.clearCookie('coderPracticaIntegrado').json({ message: "ok Logout" })
     
 })
 
 
 
-router.get('/profile',passport.authenticate('jwt',{session:false}),authorization("admin"),(req,res)=>{
+router.get('/profile',passportCall('jwt'),authorization("admin"),(req,res)=>{
     
     const payload = {
         firstName:req.user.firstName,
@@ -56,9 +57,9 @@ router.get('/profile',passport.authenticate('jwt',{session:false}),authorization
     res.status(200).send(payload)
 })
 
-router.get('/github',passport.authenticate('github',{session:false}))
+router.get('/github',passportCall('github'))
 
-router.get('/githubcallback',passport.authenticate('github',{failureRedirect:"/api/users/failLogin",session:false}),(req,res)=>{
+router.get('/githubcallback',passportCall('github'),(req,res)=>{
     
     try {
 

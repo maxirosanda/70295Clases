@@ -25,9 +25,9 @@ const userSchema = mongoose.Schema({
         type:Number,
         default:0
     },
-    role:{
-        type:String,
-        default:"user"
+    roles:{
+        type:[String],
+        default:["user"]
     }
 })
 

@@ -8,12 +8,17 @@ import { createHash, isValidPassword } from "../utils/hashingUtils.js"
 const LocalStrategy = local.Strategy
 const JWTStrategy = jwt.Strategy
 
+
+const cookieExtractor = (req) => {
+    return req && req.cookies ? req.cookies["coderPracticaIntegrado"] : null
+}
+
 const initializePassport= () => {
 
 
     passport.use('jwt',new JWTStrategy(
         {
-            jwtFromRequest: ExtractJwt.fromExtractors([(req) => req && req.cookies ? req.cookies["coderPracticaIntegrado"] : null]),
+            jwtFromRequest: ExtractJwt.fromExtractors([cookieExtractor]),
             secretOrKey:process.env.SECRET_JWT
         },
         async (jwt_payload,done) =>{
@@ -35,7 +40,7 @@ const initializePassport= () => {
             try {
 
                 const user = await userModel.findOne({email:username})
-                if(user) return done(null,false)
+                if(user) return done(null,false,{message:"User already exists"})
 
                 const newUser = {
                     email:username,
