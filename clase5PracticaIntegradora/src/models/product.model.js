@@ -13,6 +13,10 @@ const productSchema = mongoose.Schema({
     stock:{
         type:Number,
         required:true
+    },
+    category:{
+        type:String,
+        required:true
     }
 })
 
