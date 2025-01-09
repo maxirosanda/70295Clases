@@ -1,7 +1,7 @@
 import { toyDao } from "../dao/toy.dao.js"
 
 export const toyService = {
-    getToys: async () => {
+    getToys: () => {
         //logica de negocio
         const toys = toyDao.getToys()
         return toys
