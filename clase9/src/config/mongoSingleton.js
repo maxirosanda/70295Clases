@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 import { config } from './config.js';
-
+/*
 export default class MongoSingleton {
     static #instance;
 
@@ -18,3 +18,29 @@ export default class MongoSingleton {
         return this.#instance;
     }
 }
+*/
+
+const MongoSingleton =  () => {
+
+    let instance = null
+
+
+    const getInstance = async () => {
+        if (instance) {
+            console.log("Already connected")
+            return instance
+        }
+        console.log("Connected")
+        instance = {}
+        instance = await mongoose.connect(config.mongoUrl)
+        
+        return 
+    }
+
+    return {
+        getInstance
+    }
+}
+
+export const connected = MongoSingleton()
+
