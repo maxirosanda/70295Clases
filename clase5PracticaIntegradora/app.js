@@ -26,9 +26,7 @@ app.use(cors({
 }))
 app.use('/static',express.static('public'))
 app.use(express.json())
-app.use(cookieParser())
-initializePassport()
-app.use(passport.initialize())
+
 
 
 /* //ejemplo fork (en proyecto final borrar)
