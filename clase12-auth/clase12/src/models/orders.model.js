@@ -11,11 +11,7 @@ const ordersSchema = mongoose.Schema({
     },
     products:[],
     status:String,
-    totalPrice:Number,
-    createdAt:{
-        type:Date,
-        default:Date.now
-    }
+    totalPrice:Number
 })
 
 export default mongoose.model('orders',ordersSchema)

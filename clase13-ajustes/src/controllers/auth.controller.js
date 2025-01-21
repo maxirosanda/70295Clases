@@ -1,4 +1,7 @@
 import { generateToken } from "../utils/generateToken.js"
+import passwordResetModel from "../models/passwordReset.model.js"
+import { v4 as uuidv4 } from 'uuid';
+import { transport } from "../config/transportEmail.js";
 
 export const login = async (req, res) => {
     try {
@@ -33,3 +36,30 @@ export const github = (req, res) => {
         res.sendServerError(error)
     }
 }
+
+export const  passwordReset = async (req,res) => {
+    const {email} = req.body
+    const resetToken = uuidv4()
+    const user = {
+        email,
+        resetToken
+    }
+    try {
+        const result = await passwordResetModel.create(user)
+         await transport.sendMail({
+            from: 'Coder Tests maxirosanda@gmail.com',
+            to: result.email,
+            subject: 'Reset password',
+            html: `
+                <div>
+                    <h1>en este email va el link con el formulario para agregar la contraseña</h1>
+                </div>
+            `,
+            attachments: []
+        })
+        res.json({message:"success",result})
+    } catch (error) {
+        res.json(error)
+    }
+}
+

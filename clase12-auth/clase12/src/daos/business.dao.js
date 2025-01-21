@@ -16,7 +16,7 @@ export default class Business {
         } catch (error) {
 
             console.log(error)
-            return { error: "Failed to fetch businesses" }
+            return null
 
         }
     }
@@ -31,22 +31,7 @@ export default class Business {
         } catch (error) {
 
             console.log(error)
-            return { error: "Failed to fetch business by ID" }
-
-        }
-    }
-
-    getByEmail = async (email) => {
-
-        try {
-
-            const result = await businessModel.findOne({ email })
-            return result
-
-        } catch (error) {
-
-            console.log(error)
-            return { error: "Failed to fetch business by email" }
+            return null
 
         }
     }
@@ -60,7 +45,7 @@ export default class Business {
         } catch (error) {
 
             console.log(error)
-            return { error: "Failed to save business" }
+            return null
 
         }
     }
@@ -75,7 +60,7 @@ export default class Business {
         } catch (error) {
 
             console.log(error)
-            return { error: "Failed to update business" }
+            return null
             
         }
     }

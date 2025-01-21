@@ -8,77 +8,71 @@ const businessService = new Business()
 
 export const getOrders = async (req, res) => {
     try {
+
         const result = await ordersService.get()
-        res.sendSuccess(result)
+        res.send({ status: "success", result})
+
     } catch (error) {
-        res.sendServerError(error)
+
+        res.send({status:"error",error})
+        
     }
 };
 
 export const getOrderById = async (req, res) => {
     const { id } = req.params
+
     try {
+
         const result = await ordersService.getById(id)
-        res.sendSuccess(result)
+        res.send({ status: "success", result})
+
     } catch (error) {
-        res.sendServerError(error)
+
+        res.send({status:"error",error})
+        
     }
 }
 
-export const getOrderByBuyer = async (req, res) => {
-    const { idBuyer } = req.params
-    try {
-        const result = await ordersService.getByIdBuyer(idBuyer)
-        res.sendSuccess(result)
-    } catch (error) {
-        res.sendServerError(error)
-    }
-}
-
-export const getOrderByBusiness = async (req, res) => {
-    const { idBusiness } = req.params
-    try {
-        const result = await ordersService.getByIdBusiness(idBusiness)
-        res.sendSuccess(result)
-    } catch (error) {
-        res.sendServerError(error)
-    }
-}
 
 export const createOrder = async (req, res) => {
-    const { idBuyer, idBusiness, idsProducts, quantities } = req.body
+
+    const { idBuyer, idBusiness, idsProducts,quantities } = req.body
     try {
+
         if (!idBuyer || !idBusiness || !idsProducts || !quantities) {
-            return res.sendBadRequest("Required parameters are missing")
+            return res.status(400).send({ message: "Required parameters are missing" })
         }
         if (idsProducts.length !== quantities.length) {
-            return res.sendBadRequest("Products and quantities arrays must have the same length")
+            return res.status(400).send({ message: "Products and quantities arrays must have the same length" })
         }
 
         const resultBuyer = await buyerService.getById(idBuyer)
         if (!resultBuyer) {
-            return res.sendNotFound("Buyer not found")
+            return res.status(404).send({ message: "Buyer not found" })
         }
 
         const resultBusiness = await businessService.getById(idBusiness)
         if (!resultBusiness) {
-            return res.sendNotFound("Business not found")
+            return res.status(404).send({ message: "Business not found" })
         }
 
         const actualOrders = resultBusiness.products.filter(product => idsProducts.includes(product.id))
+
         if (idsProducts.length !== actualOrders.length) {
-            return res.sendBadRequest("Not all products are available")
+            return res.status(400).send({ message: "no todos los productos estan disponibles" })
         }
 
         for (let i = 0; i < actualOrders.length; i++) {
             const product = actualOrders[i]
             const quantity = quantities[i]
+
             if (product.stock < quantity) {
-                return res.sendBadRequest(`Insufficient stock for product ${product.title}`)
+                return res.status(400).send({ message: `Insufficient stock for product ${product.name}` })
             }
         }
 
-        const total = actualOrders.reduce((acc, product, index) => acc + product.price * quantities[index], 0)
+        const total = actualOrders.reduce((acc,product,index) => acc + product.price * quantities[index] , 0)
         const order = {
             business: resultBusiness,
             buyer: resultBuyer,
@@ -92,31 +86,35 @@ export const createOrder = async (req, res) => {
 
         const orderResult = await ordersService.create(order)
         if (!orderResult) {
-            return res.sendServerError("Order creation failed")
+            return res.status(404).send({ message: "Order fail" })
         }
         resultBuyer.orders.push(orderResult._id)
         await buyerService.update(idBuyer, resultBuyer)
-        res.sendCreated(orderResult)
+        res.status(201).send({ status: "success", orderResult })
+
     } catch (error) {
         console.error("Error creating order:", error)
-        res.sendServerError(error.message)
+        res.status(500).send({ status: "error", message: "An error occurred while creating the order", error: error.message })
     }
 }
+
 
 export const resolveOrder = async (req, res) => {
     const { id } = req.params
     const { resolve } = req.body
 
-    if (!id || !resolve) return res.sendBadRequest("Required parameters are missing")
-    if (resolve !== "confirmed" && resolve !== "pending" && resolve !== "cancelled") {
-        return res.sendBadRequest("Invalid 'resolve' parameter")
+    if(!id || !resolve)  return res.status(400).send({ message: "Required parameters are missing" })
+    if(resolve !== "confirmed" && resolve !== "pending" && resolve !== "cancelled"){
+        return res.status(400).send({ message: "Parámetro 'resolve' inválido" })
     }
     try {
+
         const order = await ordersService.getById(id)
         order.status = resolve
         await ordersService.resolve(order._id, order)
-        res.sendSuccess("Order resolved")
+        res.send({status: "success", result: "Order resolved"})
+
     } catch (error) {
-        res.sendServerError(error)
+        res.send({status:"error",error})
     }
 }
